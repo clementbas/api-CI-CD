@@ -1,6 +1,7 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/apiError.js';
 import Fruit from '../models/Fruit.js';
+import { getFromCache, setToCache, invalidateByPattern } from '../config/cache.js';
 
 const listFruits = asyncHandler(async (req, res) => {
   const page = Math.max(parseInt(req.query.page || '1', 10), 1);
@@ -18,12 +19,19 @@ const listFruits = asyncHandler(async (req, res) => {
     filter.stock = { $gt: 0 };
   }
 
+  const cacheKey = `fruits:${JSON.stringify({ page, limit, search: search || '', inStock })}`;
+  const cachedPayload = await getFromCache(cacheKey);
+
+  if (cachedPayload) {
+    return res.status(200).json(cachedPayload);
+  }
+
   const [items, total] = await Promise.all([
     Fruit.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
     Fruit.countDocuments(filter)
   ]);
 
-  res.status(200).json({
+  const payload = {
     success: true,
     data: {
       items,
@@ -34,7 +42,11 @@ const listFruits = asyncHandler(async (req, res) => {
         totalPages: Math.ceil(total / limit)
       }
     }
-  });
+  };
+
+  await setToCache(cacheKey, payload, 300);
+
+  res.status(200).json(payload);
 });
 
 const getFruitById = asyncHandler(async (req, res) => {
@@ -48,6 +60,7 @@ const getFruitById = asyncHandler(async (req, res) => {
 
 const createFruit = asyncHandler(async (req, res) => {
   const fruit = await Fruit.create(req.body);
+  await invalidateByPattern('fruits:*');
   res.status(201).json({ success: true, message: 'Fruit created', data: fruit });
 });
 
@@ -61,6 +74,8 @@ const updateFruit = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'Fruit not found');
   }
 
+  await invalidateByPattern('fruits:*');
+
   res.status(200).json({ success: true, message: 'Fruit updated', data: fruit });
 });
 
@@ -72,6 +87,8 @@ const deleteFruit = asyncHandler(async (req, res) => {
 
   fruit.isActive = false;
   await fruit.save();
+
+  await invalidateByPattern('fruits:*');
 
   res.status(200).json({ success: true, message: 'Fruit archived' });
 });
