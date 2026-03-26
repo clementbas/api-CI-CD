@@ -1,6 +1,10 @@
 import redis from './redis.js';
 
 export async function getFromCache(key) { // lis une clé déjà en mémoire redis pour ne pas interroger la base de données
+    if (!redis) {
+        return null;
+    }
+
     try {
         const rawValue = await redis.get(key);
 
@@ -25,6 +29,10 @@ export async function getFromCache(key) { // lis une clé déjà en mémoire red
 }
 
 export async function setToCache(key, value, ttlSeconds = 300) { // Enregistre le résultat d'une requête en cache pdt un temps limité
+    if (!redis) {
+        return false;
+    }
+
     try {
         const safeTtl = Number.isInteger(ttlSeconds) && ttlSeconds > 0 ? ttlSeconds : 300;
         const payload = JSON.stringify(value);
@@ -39,6 +47,10 @@ export async function setToCache(key, value, ttlSeconds = 300) { // Enregistre l
 }
 
 export async function invalidateByPattern(pattern) { // Vide le cache quand les données changent
+    if (!redis) {
+        return 0;
+    }
+
     let cursor = '0';
     let deleted = 0;
 
