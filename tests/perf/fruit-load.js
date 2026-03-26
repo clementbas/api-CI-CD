@@ -12,7 +12,9 @@ export const options = {
 }
 
 export default function () {
-    let res = http.get('http://localhost:8000/api/v1/fruits?page=1&limit=30');
+    const baseUrl = __ENV.BASE_URL || 'http://localhost:8000';
+
+    let res = http.get(baseUrl + '/api/v1/fruits?page=1&limit=30');
     check(res, { "status is 200": (res) => res.status === 200 });
     sleep(0.3);
 }

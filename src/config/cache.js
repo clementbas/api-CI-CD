@@ -2,6 +2,7 @@ import redis from './redis.js';
 
 export async function getFromCache(key) { // lis une clé déjà en mémoire redis pour ne pas interroger la base de données
     if (!redis) {
+        console.warn('Redis client not initialized, skipping cache read');
         return null;
     }
 
@@ -30,6 +31,7 @@ export async function getFromCache(key) { // lis une clé déjà en mémoire red
 
 export async function setToCache(key, value, ttlSeconds = 300) { // Enregistre le résultat d'une requête en cache pdt un temps limité
     if (!redis) {
+        console.warn('Redis client not initialized, skipping cache write');
         return false;
     }
 
@@ -48,6 +50,7 @@ export async function setToCache(key, value, ttlSeconds = 300) { // Enregistre l
 
 export async function invalidateByPattern(pattern) { // Vide le cache quand les données changent
     if (!redis) {
+        console.warn('Redis client not initialized, skipping cache invalidation');
         return 0;
     }
 
