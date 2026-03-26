@@ -1,0 +1,26 @@
+meta {
+  name: Create Fruit Admin
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/fruits
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+body:json {
+  {
+    "name": "Banane",
+    "description": "Banane bio",
+    "price": 2.5,
+    "stock": 100,
+    "category": "fresh"
+  }
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Create Order From Cart
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "paymentMethod": "card",
+    "shippingAddress": {
+      "line1": "10 Rue de Paris",
+      "city": "Paris",
+      "postalCode": "75001",
+      "country": "France"
+    }
+  }
+}

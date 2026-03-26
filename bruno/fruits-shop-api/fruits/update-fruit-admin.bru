@@ -1,0 +1,23 @@
+meta {
+  name: Update Fruit Admin
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/fruits/{{fruitId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer {{adminToken}}
+}
+
+body:json {
+  {
+    "price": 3,
+    "stock": 120
+  }
+}
